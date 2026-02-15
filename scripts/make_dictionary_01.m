@@ -9,6 +9,14 @@ end
 repoRoot = fileparts(fileparts(thisFile));
 dictPath = fullfile(repoRoot, 'data', 'acc_params.sldd');
 
+% Corporate workflows often keep dictionaries open in editor/session.
+% Force-close all open dictionaries before recreating this one.
+try
+    Simulink.data.dictionary.closeAll('-discard');
+catch
+    Simulink.data.dictionary.closeAll;
+end
+
 if exist(dictPath, 'file')
     delete(dictPath);
 end

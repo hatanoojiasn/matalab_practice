@@ -33,3 +33,5 @@ run_mils(struct('scenario','cut_in','vSet',26))
 - **外部入力注入の不整合**: モデル側は `From Workspace(vL_ts)` 固定、`run_mils.m`は `simIn.setVariable('vL_ts', ...)` で注入します。
 - **slbuildターゲットエラー**: `codegen_04.m`で`SystemTargetFile='grt.tlc'`を明示、さらに`license('test','Simulink_Coder')`で事前判定して未導入環境は明示スキップします。
 - **貼り付け由来の不可視文字エラー**: `run_all.m` は実行前に `scripts/*.m` の BOM/非ASCII を自動除去します。テキストエディタ経由のコピペで混入した文字が原因でも復旧しやすくしています。
+
+- **ファイル名エラー（先頭数字）**: `run_all.m` は legacy 名 (`00_setup.m` 等) が残っていた場合に、MATLAB有効名 (`setup_00.m` 等) へ自動リネームしてから実行します。

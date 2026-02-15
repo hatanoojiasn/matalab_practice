@@ -8,6 +8,25 @@ if isempty(thisFile)
 end
 repoRoot = fileparts(fileparts(thisFile));
 
+% Ensure helper functions in scripts/ are callable from any cwd.
+addpath(fullfile(repoRoot, 'scripts'));
+
+% Auto-fix legacy/invalid MATLAB filenames if a bad merge restored them.
+legacyMap = {
+    fullfile(repoRoot, 'scripts', '00_setup.m'), fullfile(repoRoot, 'scripts', 'setup_00.m')
+    fullfile(repoRoot, 'scripts', '01_make_dictionary.m'), fullfile(repoRoot, 'scripts', 'make_dictionary_01.m')
+    fullfile(repoRoot, 'scripts', '02_make_model.m'), fullfile(repoRoot, 'scripts', 'make_model_02.m')
+    fullfile(repoRoot, 'scripts', '04_codegen.m'), fullfile(repoRoot, 'scripts', 'codegen_04.m')
+    };
+for i = 1:size(legacyMap, 1)
+    oldPath = legacyMap{i, 1};
+    newPath = legacyMap{i, 2};
+    if exist(oldPath, 'file') && ~exist(newPath, 'file')
+        movefile(oldPath, newPath, 'f');
+        fprintf('[run_all] renamed legacy script: %s -> %s\n', oldPath, newPath);
+    end
+end
+
 scriptList = {
     fullfile(repoRoot, 'scripts', 'setup_00.m')
     fullfile(repoRoot, 'scripts', 'make_dictionary_01.m')
