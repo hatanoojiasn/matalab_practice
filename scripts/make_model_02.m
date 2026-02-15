@@ -50,7 +50,6 @@ add_block('simulink/Discrete/Unit Delay', [modelName '/vE_z1'], ...
     'Position', [220 40 280 70], 'SampleTime', 'dt', 'InitialCondition', 'vE0');
 add_block('simulink/Discrete/Unit Delay', [modelName '/d_z1'], ...
     'Position', [220 110 280 140], 'SampleTime', 'dt', 'InitialCondition', 'd_init');
-% Older MATLAB releases may not support UnitDelay parameter 'OutDataTypeStr'.
 add_block('simulink/Discrete/Unit Delay', [modelName '/mode_z1'], ...
     'Position', [220 180 280 210], 'SampleTime', 'dt', 'InitialCondition', '0');
 add_block('simulink/Discrete/Unit Delay', [modelName '/aPrev_z1'], ...
@@ -121,7 +120,6 @@ ctrlCode = sprintf(['function [aCmd, mode] = fcn(vE, d, vL, modePrev, aPrev, dt,
 'elseif aCmd < aMin\n' ...
 '    aCmd = aMin;\n' ...
 'end\n']);
-set_param([modelName '/ACC_Controller'], 'Script', ctrlCode);
 
 plantCode = sprintf(['function [vE_next, d_next] = fcn(vE, d, vL, aCmd, dt)\n' ...
 '%#codegen\n' ...
@@ -133,33 +131,93 @@ plantCode = sprintf(['function [vE_next, d_next] = fcn(vE, d, vL, aCmd, dt)\n' .
 'if d_next < 0\n' ...
 '    d_next = 0;\n' ...
 'end\n']);
-set_param([modelName '/Plant_Update'], 'Script', plantCode);
 
-% Wiring
-add_line(modelName, 'vE_z1/1', 'ACC_Controller/1');
-add_line(modelName, 'd_z1/1', 'ACC_Controller/2');
-add_line(modelName, 'vL_FromWs/1', 'ACC_Controller/3');
-add_line(modelName, 'mode_z1/1', 'ACC_Controller/4');
-add_line(modelName, 'aPrev_z1/1', 'ACC_Controller/5');
-
-for i = 1:numel(pNames)
-    add_line(modelName, [pNames{i} '/1'], ['ACC_Controller/' num2str(i+5)]);
+useFallbackFcnBlocks = false;
+try
+    set_param([modelName '/ACC_Controller'], 'Script', ctrlCode);
+    set_param([modelName '/Plant_Update'], 'Script', plantCode);
+catch
+    useFallbackFcnBlocks = true;
 end
 
-add_line(modelName, 'vE_z1/1', 'Plant_Update/1');
-add_line(modelName, 'd_z1/1', 'Plant_Update/2');
-add_line(modelName, 'vL_FromWs/1', 'Plant_Update/3');
-add_line(modelName, 'ACC_Controller/1', 'Plant_Update/4');
-add_line(modelName, 'dt/1', 'Plant_Update/5');
+if ~useFallbackFcnBlocks
+    % Wiring for MATLAB Function blocks
+    add_line(modelName, 'vE_z1/1', 'ACC_Controller/1');
+    add_line(modelName, 'd_z1/1', 'ACC_Controller/2');
+    add_line(modelName, 'vL_FromWs/1', 'ACC_Controller/3');
+    add_line(modelName, 'mode_z1/1', 'ACC_Controller/4');
+    add_line(modelName, 'aPrev_z1/1', 'ACC_Controller/5');
 
-add_line(modelName, 'Plant_Update/1', 'vE_z1/1', 'autorouting', 'on');
-add_line(modelName, 'Plant_Update/2', 'd_z1/1', 'autorouting', 'on');
-add_line(modelName, 'ACC_Controller/2', 'mode_z1/1');
-add_line(modelName, 'ACC_Controller/1', 'aPrev_z1/1');
+    for i = 1:numel(pNames)
+        add_line(modelName, [pNames{i} '/1'], ['ACC_Controller/' num2str(i+5)]);
+    end
 
-add_line(modelName, 'vE_z1/1', 'ToWs_vE/1');
-add_line(modelName, 'd_z1/1', 'ToWs_d/1');
-add_line(modelName, 'ACC_Controller/1', 'ToWs_aCmd/1');
+    add_line(modelName, 'vE_z1/1', 'Plant_Update/1');
+    add_line(modelName, 'd_z1/1', 'Plant_Update/2');
+    add_line(modelName, 'vL_FromWs/1', 'Plant_Update/3');
+    add_line(modelName, 'ACC_Controller/1', 'Plant_Update/4');
+    add_line(modelName, 'dt/1', 'Plant_Update/5');
+
+    add_line(modelName, 'Plant_Update/1', 'vE_z1/1', 'autorouting', 'on');
+    add_line(modelName, 'Plant_Update/2', 'd_z1/1', 'autorouting', 'on');
+    add_line(modelName, 'ACC_Controller/2', 'mode_z1/1');
+    add_line(modelName, 'ACC_Controller/1', 'aPrev_z1/1');
+
+    add_line(modelName, 'vE_z1/1', 'ToWs_vE/1');
+    add_line(modelName, 'd_z1/1', 'ToWs_d/1');
+    add_line(modelName, 'ACC_Controller/1', 'ToWs_aCmd/1');
+else
+    % Fallback wiring for environments without writable MATLAB Function Script param.
+    delete_block([modelName '/ACC_Controller']);
+    delete_block([modelName '/Plant_Update']);
+
+    add_block('simulink/User-Defined Functions/MATLAB Fcn', [modelName '/ACC_Controller'], ...
+        'Position', [500 140 760 180], ...
+        'Expr', 'acc_controller_step(u(1),u(2),u(3),u(4),u(5),u(6),u(7),u(8),u(9),u(10),u(11),u(12),u(13),u(14),u(15),u(16),u(17),u(18))');
+    add_block('simulink/User-Defined Functions/MATLAB Fcn', [modelName '/Plant_Update'], ...
+        'Position', [890 90 1120 130], ...
+        'Expr', 'plant_update_step(u(1),u(2),u(3),u(4),u(5))');
+
+    add_block('simulink/Signal Routing/Mux', [modelName '/ACC_Mux'], ...
+        'Position', [380 120 400 340], 'Inputs', '18');
+    add_block('simulink/Signal Routing/Mux', [modelName '/Plant_Mux'], ...
+        'Position', [820 80 840 190], 'Inputs', '5');
+
+    add_block('simulink/Signal Routing/Demux', [modelName '/ACC_Demux'], ...
+        'Position', [800 140 820 220], 'Outputs', '2');
+    add_block('simulink/Signal Routing/Demux', [modelName '/Plant_Demux'], ...
+        'Position', [1140 90 1160 170], 'Outputs', '2');
+
+    add_line(modelName, 'vE_z1/1', 'ACC_Mux/1');
+    add_line(modelName, 'd_z1/1', 'ACC_Mux/2');
+    add_line(modelName, 'vL_FromWs/1', 'ACC_Mux/3');
+    add_line(modelName, 'mode_z1/1', 'ACC_Mux/4');
+    add_line(modelName, 'aPrev_z1/1', 'ACC_Mux/5');
+    for i = 1:numel(pNames)
+        add_line(modelName, [pNames{i} '/1'], ['ACC_Mux/' num2str(i+5)]);
+    end
+    add_line(modelName, 'ACC_Mux/1', 'ACC_Controller/1');
+    add_line(modelName, 'ACC_Controller/1', 'ACC_Demux/1');
+
+    add_line(modelName, 'vE_z1/1', 'Plant_Mux/1');
+    add_line(modelName, 'd_z1/1', 'Plant_Mux/2');
+    add_line(modelName, 'vL_FromWs/1', 'Plant_Mux/3');
+    add_line(modelName, 'ACC_Demux/1', 'Plant_Mux/4');
+    add_line(modelName, 'dt/1', 'Plant_Mux/5');
+    add_line(modelName, 'Plant_Mux/1', 'Plant_Update/1');
+    add_line(modelName, 'Plant_Update/1', 'Plant_Demux/1');
+
+    add_line(modelName, 'Plant_Demux/1', 'vE_z1/1', 'autorouting', 'on');
+    add_line(modelName, 'Plant_Demux/2', 'd_z1/1', 'autorouting', 'on');
+    add_line(modelName, 'ACC_Demux/2', 'mode_z1/1');
+    add_line(modelName, 'ACC_Demux/1', 'aPrev_z1/1');
+
+    add_line(modelName, 'vE_z1/1', 'ToWs_vE/1');
+    add_line(modelName, 'd_z1/1', 'ToWs_d/1');
+    add_line(modelName, 'ACC_Demux/1', 'ToWs_aCmd/1');
+
+    fprintf('[02_make_model] MATLAB Function Script unsupported; used MATLAB Fcn fallback blocks.\n');
+end
 
 save_system(modelName, modelPath);
 close_system(modelName);
