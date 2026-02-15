@@ -21,8 +21,17 @@ end
 new_system(modelName);
 open_system(modelName);
 
+% Link data dictionary with compatibility fallback for older MATLAB versions.
+[~, dictFile, dictExt] = fileparts(dictPath);
+dictNameOnly = [dictFile dictExt];
+try
+    set_param(modelName, 'DataDictionary', dictPath);
+catch
+    % Some versions reject full paths and accept only dictionary filename on path.
+    set_param(modelName, 'DataDictionary', dictNameOnly);
+end
+
 set_param(modelName, ...
-    'DataDictionary', dictPath, ...
     'SolverType', 'Fixed-step', ...
     'Solver', 'FixedStepDiscrete', ...
     'FixedStep', 'dt', ...
