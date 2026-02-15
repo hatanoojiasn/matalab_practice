@@ -40,4 +40,5 @@ run_mils(struct('scenario','cut_in','vSet',26))
 
 - **Unit Delay に OutDataTypeStr が無いエラー**: 互換性のため `make_model_02.m` では `mode_z1` の Unit Delay に `OutDataTypeStr` を設定しない実装にしています。
 
-- **OutDataTypeStrエラーが再発する**: `run_all.m` は `make_model_02.m` に古い記述（`OutDataTypeStr`）が残っていれば実行前に自動除去します。
+
+- **再実行時の残留状態**: `run_all.m` は実行前に `acc_mils` モデル/開いている辞書/主要ログ変数（`vL_ts`,`vE_log`,`d_log`,`aCmd_log`）を軽くクリーンして再現性を上げています。
