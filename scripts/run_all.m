@@ -42,6 +42,31 @@ for i = 1:numel(scriptList)
     end
 end
 
+% Lightweight session cleanup so rerun is deterministic.
+if bdIsLoaded('acc_mils')
+    close_system('acc_mils', 0);
+end
+try
+    Simulink.data.dictionary.closeAll('-discard');
+catch
+    try
+        Simulink.data.dictionary.closeAll;
+    catch
+    end
+end
+if evalin('base', 'exist(''vL_ts'',''var'')')
+    evalin('base', 'clear vL_ts');
+end
+if evalin('base', 'exist(''vE_log'',''var'')')
+    evalin('base', 'clear vE_log');
+end
+if evalin('base', 'exist(''d_log'',''var'')')
+    evalin('base', 'clear d_log');
+end
+if evalin('base', 'exist(''aCmd_log'',''var'')')
+    evalin('base', 'clear aCmd_log');
+end
+
 run(scriptList{1});
 run(scriptList{2});
 run(scriptList{3});

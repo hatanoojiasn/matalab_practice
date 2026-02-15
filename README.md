@@ -39,3 +39,6 @@ run_mils(struct('scenario','cut_in','vSet',26))
 - **DataDictionary名が無効エラー**: `make_model_02.m` はまずフルパスで辞書紐付けを試し、失敗時は `acc_params.sldd` のファイル名指定へ自動フォールバックします。
 
 - **Unit Delay に OutDataTypeStr が無いエラー**: 互換性のため `make_model_02.m` では `mode_z1` の Unit Delay に `OutDataTypeStr` を設定しない実装にしています。
+
+
+- **再実行時の残留状態**: `run_all.m` は実行前に `acc_mils` モデル/開いている辞書/主要ログ変数（`vL_ts`,`vE_log`,`d_log`,`aCmd_log`）を軽くクリーンして再現性を上げています。
