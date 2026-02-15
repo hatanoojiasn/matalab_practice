@@ -172,11 +172,22 @@ else
     delete_block([modelName '/Plant_Update']);
 
     add_block('simulink/User-Defined Functions/MATLAB Fcn', [modelName '/ACC_Controller'], ...
-        'Position', [500 140 760 180], ...
-        'Expr', 'acc_controller_step(u(1),u(2),u(3),u(4),u(5),u(6),u(7),u(8),u(9),u(10),u(11),u(12),u(13),u(14),u(15),u(16),u(17),u(18))');
+        'Position', [500 140 760 180]);
     add_block('simulink/User-Defined Functions/MATLAB Fcn', [modelName '/Plant_Update'], ...
-        'Position', [890 90 1120 130], ...
-        'Expr', 'plant_update_step(u(1),u(2),u(3),u(4),u(5))');
+        'Position', [890 90 1120 130]);
+
+    accExpr = 'acc_controller_step(u(1),u(2),u(3),u(4),u(5),u(6),u(7),u(8),u(9),u(10),u(11),u(12),u(13),u(14),u(15),u(16),u(17),u(18))';
+    plantExpr = 'plant_update_step(u(1),u(2),u(3),u(4),u(5))';
+    try
+        set_param([modelName '/ACC_Controller'], 'Expr', accExpr);
+    catch
+        set_param([modelName '/ACC_Controller'], 'MATLABFcn', accExpr);
+    end
+    try
+        set_param([modelName '/Plant_Update'], 'Expr', plantExpr);
+    catch
+        set_param([modelName '/Plant_Update'], 'MATLABFcn', plantExpr);
+    end
 
     add_block('simulink/Signal Routing/Mux', [modelName '/ACC_Mux'], ...
         'Position', [380 120 400 340], 'Inputs', '18');

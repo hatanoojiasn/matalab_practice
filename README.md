@@ -44,3 +44,5 @@ run_mils(struct('scenario','cut_in','vSet',26))
 - **再実行時の残留状態**: `run_all.m` は実行前に `acc_mils` モデル/開いている辞書/主要ログ変数（`vL_ts`,`vE_log`,`d_log`,`aCmd_log`）を軽くクリーンして再現性を上げています。
 
 - **'SubSystem block に Script パラメーターがない' エラー**: `make_model_02.m` は `MATLAB Function` の `Script` 設定に失敗した場合、自動で `MATLAB Fcn + Mux/Demux` 構成へフォールバックします。
+
+- **MATLABFcn block に Expr パラメーターがないエラー**: `make_model_02.m` は `MATLAB Fcn` フォールバック時に `Expr` を優先し、未対応環境では `MATLABFcn` パラメーターへ自動フォールバックします。
