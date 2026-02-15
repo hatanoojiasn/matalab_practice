@@ -40,8 +40,8 @@ for i = 1:size(params,1)
     val  = params{i,2};
     p = Simulink.Parameter(val);
     p.DataType = 'double';
-    p.Min = -inf;
-    p.Max = inf;
+    % Keep range unconstrained for broad compatibility.
+    % Some MATLAB/Simulink versions reject +/-Inf for Min/Max.
     try
         p.CoderInfo.StorageClass = 'ExportedGlobal';
     catch
