@@ -37,3 +37,5 @@ run_mils(struct('scenario','cut_in','vSet',26))
 - **ファイル名エラー（先頭数字）**: `run_all.m` は legacy 名 (`00_setup.m` 等) が残っていた場合に、MATLAB有効名 (`setup_00.m` 等) へ自動リネームしてから実行します。
 
 - **DataDictionary名が無効エラー**: `make_model_02.m` はまずフルパスで辞書紐付けを試し、失敗時は `acc_params.sldd` のファイル名指定へ自動フォールバックします。
+
+- **Unit Delay に OutDataTypeStr が無いエラー**: 互換性のため `make_model_02.m` では `mode_z1` の Unit Delay に `OutDataTypeStr` を設定しない実装にしています。
