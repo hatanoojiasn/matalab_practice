@@ -19,10 +19,10 @@ if ~exist(resultsDir, 'dir')
 end
 
 if ~exist(dictPath, 'file')
-    run(fullfile(repoRoot, 'scripts', '01_make_dictionary.m'));
+    run(fullfile(repoRoot, 'scripts', 'make_dictionary_01.m'));
 end
 if ~exist(modelPath, 'file')
-    run(fullfile(repoRoot, 'scripts', '02_make_model.m'));
+    run(fullfile(repoRoot, 'scripts', 'make_model_02.m'));
 end
 
 addpath(repoRoot);
