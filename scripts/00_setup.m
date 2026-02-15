@@ -8,7 +8,7 @@ if isempty(thisFile)
 end
 repoRoot = fileparts(fileparts(thisFile));
 
-requiredDirs = {"model", "data", "scripts", "results", "build", "scenarios"};
+requiredDirs = {'model', 'data', 'scripts', 'results', 'build', 'scenarios'};
 for i = 1:numel(requiredDirs)
     p = fullfile(repoRoot, requiredDirs{i});
     if ~exist(p, 'dir')
