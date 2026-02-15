@@ -1,0 +1,5 @@
+slprj/
+build/
+*.autosave
+*.asv
+results/*.png
