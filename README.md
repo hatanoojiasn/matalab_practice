@@ -34,15 +34,12 @@ run_mils(struct('scenario','cut_in','vSet',26))
 - **slbuildターゲットエラー**: `codegen_04.m`で`SystemTargetFile='grt.tlc'`を明示、さらに`license('test','Simulink_Coder')`で事前判定して未導入環境は明示スキップします。
 - **貼り付け由来の不可視文字エラー**: `run_all.m` は実行前に `scripts/*.m` の BOM/非ASCII を自動除去します。テキストエディタ経由のコピペで混入した文字が原因でも復旧しやすくしています。
 
-- **ファイル名エラー（先頭数字）**: `run_all.m` は legacy 名 (`00_setup.m` 等) が残っていた場合に、MATLAB有効名 (`setup_00.m` 等) へ自動リネームしてから実行します。
+- **スクリプト命名の重複**: 先頭数字ファイル（`00_*.m` 等）は廃止し、`setup_00.m` / `make_dictionary_01.m` / `make_model_02.m` / `codegen_04.m` を正本として運用します。
+
 
 - **DataDictionary名が無効エラー**: `make_model_02.m` はまずフルパスで辞書紐付けを試し、失敗時は `acc_params.sldd` のファイル名指定へ自動フォールバックします。
-
-- **Unit Delay に OutDataTypeStr が無いエラー**: 互換性のため `make_model_02.m` では `mode_z1` の Unit Delay に `OutDataTypeStr` を設定しない実装にしています。
 
 
 - **再実行時の残留状態**: `run_all.m` は実行前に `acc_mils` モデル/開いている辞書/主要ログ変数（`vL_ts`,`vE_log`,`d_log`,`aCmd_log`）を軽くクリーンして再現性を上げています。
 
-- **'SubSystem block に Script パラメーターがない' エラー**: `make_model_02.m` は `MATLAB Function` の `Script` 設定に失敗した場合、自動で `MATLAB Fcn + Mux/Demux` 構成へフォールバックします。
-
-- **MATLABFcn block に Expr パラメーターがないエラー**: `make_model_02.m` は `MATLAB Fcn` フォールバック時に `Expr` を優先し、未対応環境では `MATLABFcn` パラメーターへ自動フォールバックします。
+- **Scriptプロパティ互換性問題**: 現行 `make_model_02.m` は `MATLAB Function` / `MATLAB Fcn` の `Script`/`Expr` 設定に依存せず、基本ブロック構成でモデルを生成します。
