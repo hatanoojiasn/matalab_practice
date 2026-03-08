@@ -9,8 +9,6 @@ end
 repoRoot = fileparts(fileparts(thisFile));
 dictPath = fullfile(repoRoot, 'data', 'acc_params.sldd');
 
-% Corporate workflows often keep dictionaries open in editor/session.
-% Force-close all open dictionaries before recreating this one.
 try
     Simulink.data.dictionary.closeAll('-discard');
 catch
@@ -25,11 +23,22 @@ dictObj = Simulink.data.dictionary.create(dictPath);
 dData = getSection(dictObj, 'Design Data');
 
 params = {
-    'dt',         0.05;
+    'Ts',         0.05;
+    'dt',         0.05;   % compatibility alias for scripts/scenarios
     'StopTime',   60;
     'vSet',       25;
-    'Th',         1.4;
     'd0',         8;
+    'time_gap',   1.4;
+    'Kv',         0.5;
+    'Kgap',       0.25;
+    'Kdv',        0.6;
+    'd_switch',   32;
+    'amin',      -3.5;
+    'amax',       2.0;
+    'vE0',       20;
+    'd_init',    40;
+    % legacy names kept for backwards override compatibility
+    'Th',         1.4;
     'Kv_free',    0.5;
     'Kd',         0.25;
     'Kv_rel',     0.6;
@@ -39,8 +48,6 @@ params = {
     'dDetectOn', 32;
     'dDetectOff',36;
     'dEmergency',10;
-    'vE0',       20;
-    'd_init',    40;
     };
 
 for i = 1:size(params,1)
@@ -48,12 +55,9 @@ for i = 1:size(params,1)
     val  = params{i,2};
     p = Simulink.Parameter(val);
     p.DataType = 'double';
-    % Keep range unconstrained for broad compatibility.
-    % Some MATLAB/Simulink versions reject +/-Inf for Min/Max.
     try
         p.CoderInfo.StorageClass = 'ExportedGlobal';
     catch
-        % If storage class cannot be set in this environment, keep default.
     end
     addEntry(dData, name, p);
 end

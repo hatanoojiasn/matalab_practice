@@ -32,11 +32,13 @@ if ~bdIsLoaded(modelName)
     load_system(modelPath);
 end
 
-baseVals = localReadParams(dictPath, {'dt','StopTime'});
-if isfield(overrides, 'dt')
+baseVals = localReadParams(dictPath, {'Ts','dt','StopTime'});
+if isfield(overrides, 'Ts')
+    dt = overrides.Ts;
+elseif isfield(overrides, 'dt')
     dt = overrides.dt;
 else
-    dt = baseVals.dt;
+    dt = baseVals.Ts;
 end
 if isfield(overrides, 'StopTime')
     stopTimeVal = overrides.StopTime;
@@ -64,6 +66,12 @@ for i = 1:numel(fields)
         continue;
     end
     simIn = simIn.setVariable(key, overrides.(key));
+end
+if isfield(overrides, 'dt') && ~isfield(overrides, 'Ts')
+    simIn = simIn.setVariable('Ts', overrides.dt);
+end
+if isfield(overrides, 'Ts') && ~isfield(overrides, 'dt')
+    simIn = simIn.setVariable('dt', overrides.Ts);
 end
 
 simOut = sim(simIn);
