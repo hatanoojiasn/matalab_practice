@@ -142,7 +142,7 @@ add_block('simulink/Sources/Constant', [ss '/amin_const'], ...
 add_block('simulink/Sources/Constant', [ss '/amax_const'], ...
     'Position', [120 525 210 545], 'Value', 'amax');
 
-% RelativeSpeed: v_lead - v_ego
+% RelativeSpeed: dv = v_lead - v_ego
 add_block('simulink/Math Operations/Sum', [ss '/RelativeSpeed'], ...
     'Position', [250 45 285 75], 'Inputs', '+-');
 
@@ -214,7 +214,7 @@ localAddNamedLine(ss, 'SpeedControl/1', 'a_speed/1', 'a_speed');
 localAddNamedLine(ss, 'Kgap_const/1', 'GapControl_GapTerm/1', 'Kgap');
 localAddNamedLine(ss, 'GapError/1', 'GapControl_GapTerm/2', 'e_gap_to_ctrl');
 localAddNamedLine(ss, 'Kdv_const/1', 'GapControl_RelTerm/1', 'Kdv');
-localAddNamedLine(ss, 'RelativeSpeed/1', 'GapControl_RelTerm/2', 'v_rel');
+localAddNamedLine(ss, 'RelativeSpeed/1', 'GapControl_RelTerm/2', 'dv');
 localAddNamedLine(ss, 'GapControl_GapTerm/1', 'GapControl/1', 'gap_term');
 localAddNamedLine(ss, 'GapControl_RelTerm/1', 'GapControl/2', 'rel_term');
 localAddNamedLine(ss, 'GapControl/1', 'a_gap/1', 'a_gap');
